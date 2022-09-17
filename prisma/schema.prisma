@@ -11,10 +11,12 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  name  String?
-  email String  @unique
-  posts Post[]
+  id       Int       @id @default(autoincrement())
+  name     String?
+  email    String    @unique
+  posts    Post[]
+  likes    Like[]
+  comments Comment[]
 }
 
 model Post {
@@ -31,14 +33,18 @@ model Post {
 }
 
 model Like {
-  id Int @id @default(autoincrement())
+  id     Int   @id @default(autoincrement())
   post   Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   postId Int?
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId Int
 }
 
 model Comment {
   id      Int    @id @default(autoincrement())
   content String
-  post   Post? @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  postId Int?
+  post    Post?  @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postId  Int?
+  User    User?  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId  Int?
 }

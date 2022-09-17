@@ -56,7 +56,7 @@ app.post("/likes", async (req, res) => {
   try {
     const newLike = await prisma.like.create({
       data: req.body,
-      include: {post: true}
+      include: { post: true },
     });
     res.send(newLike);
   } catch (error) {
@@ -70,13 +70,13 @@ app.post("/comments", async (req, res) => {
   try {
     const newComment = await prisma.comment.create({
       data: req.body,
-      include: {post: true}
+      include: { post: true },
     });
     res.send(newComment);
   } catch (error) {
     res.status(404).send({ error: error });
   }
-})
+});
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
