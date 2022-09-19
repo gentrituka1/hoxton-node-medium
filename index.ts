@@ -32,7 +32,7 @@ app.get("/posts/:id", async (req, res) => {
     include: {
       user: true,
       comments: true,
-      _count: { select: { likes: true } },
+      _count: { select: { likes: true }},
     },
   });
   res.send(post);
@@ -50,33 +50,92 @@ app.post("/posts", async (req, res) => {
   }
 });
 
-app.post("/likes", async (req, res) => {
-  // like a post
+app.delete("/posts/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const post = await prisma.post.delete({
+    where: { id },
+  });
+  res.send(post);
+})
 
-  try {
-    const newLike = await prisma.like.create({
-      data: req.body,
-      include: { post: true },
-    });
-    res.send(newLike);
+app.get("/likes", async (req, res) => {
+  const likes = await prisma.like.findMany({
+    include: {
+      post: true,
+    },
+  });
+  res.send(likes);
+})
+
+app.get("/posts/:id/likes", async (req, res) => {
+  const id = Number(req.params.id);
+  const likes = await prisma.like.findMany({
+    where: { postId: id }
+  });
+  res.send(likes);
+})
+
+app.post("/posts/:id/likes", async (req, res) => {
+  
+  const id = Number(req.params.id);
+  const newLike = await prisma.like.create({
+    data: { postId: id },
+  });
+  const likes = await prisma.like.findMany({
+    where: { postId: id }
+  })
+  res.send(likes);
+
+})
+
+app.get("/comments", async (req, res) => {
+  const comments = await prisma.comment.findMany({
+    include: {
+      post: true,
+    },
+  });
+  res.send(comments);
+})
+
+app.get("/posts/:id/comments", async (req, res) => {
+  const id = Number(req.params.id);
+  const comments = await prisma.comment.findMany({
+    where: { postId: id },
+  });
+  res.send(comments);
+})
+
+app.post("/posts/:id/comments", async (req, res) => {
+  const id = Number(req.params.id);
+  const newComment = await prisma.comment.create({
+    data: { postId: id, ...req.body },
+  });
+  res.send(newComment);
+});
+
+app.get("/users", async (req, res) => {
+  const users = await prisma.user.findMany({
+    include: {
+      posts: true
+    },
+  });
+  res.send(users);
+})
+
+app.get("/users/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  try{
+  const user = await prisma.user.findUnique({
+    where: { id },
+    include: {
+      posts: true
+    }
+  });
+  res.send(user);
   } catch (error) {
     res.status(404).send({ error: error });
   }
-});
-
-app.post("/comments", async (req, res) => {
-  // comment on a post
-
-  try {
-    const newComment = await prisma.comment.create({
-      data: req.body,
-      include: { post: true },
-    });
-    res.send(newComment);
-  } catch (error) {
-    res.status(404).send({ error: error });
-  }
-});
+})
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
