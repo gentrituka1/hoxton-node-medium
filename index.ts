@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const port = 5000;
+const port = 4000;
 
 app.get("/posts", async (req, res) => {
   const posts = await prisma.post.findMany({
@@ -67,7 +67,7 @@ app.get("/likes", async (req, res) => {
   res.send(likes);
 })
 
-app.get("/posts/:id/likes", async (req, res) => {
+app.get("/likes/:id", async (req, res) => {
   const id = Number(req.params.id);
   const likes = await prisma.like.findMany({
     where: { postId: id }
@@ -97,7 +97,7 @@ app.get("/comments", async (req, res) => {
   res.send(comments);
 })
 
-app.get("/posts/:id/comments", async (req, res) => {
+app.get("/comments/:id", async (req, res) => {
   const id = Number(req.params.id);
   const comments = await prisma.comment.findMany({
     where: { postId: id },
@@ -105,13 +105,20 @@ app.get("/posts/:id/comments", async (req, res) => {
   res.send(comments);
 })
 
-app.post("/posts/:id/comments", async (req, res) => {
-  const id = Number(req.params.id);
-  const newComment = await prisma.comment.create({
-    data: { postId: id, ...req.body },
-  });
-  res.send(newComment);
+app.post("/comments", async (req, res) => {
+    const newComment = await prisma.comment.create({
+        data: req.body,
+    });
+    res.send(newComment);
 });
+
+app.delete("/comments/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    const comment = await prisma.comment.delete({
+        where: { id },
+    });
+    res.send(comment);
+})
 
 app.get("/users", async (req, res) => {
   const users = await prisma.user.findMany({
